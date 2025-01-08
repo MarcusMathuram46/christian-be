@@ -7,7 +7,7 @@ const User = require("../model/userModal");
 const createUser = async (req, res)=>{
     const {name, email, password} = req.body;
     try{
-        const user = await User.findOne({name:name, email:email});
+        const user = await User.findOne({email});
         if(!user){
             const passwordHash = await bcrypt.hash(password, 10);
             const newUser = new User({

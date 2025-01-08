@@ -12,7 +12,7 @@ const login = async (req, res)=>{
             if(!passCheck){
                 return res.status(400).json({message: "Invalid password"})
             }
-            let token = await JWT_SECRET.sign(
+            let token = await jwt.sign(
                 {
                     email,
                     id: user._id,
