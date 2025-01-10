@@ -1,6 +1,8 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const User = require("../model/userModal");
+const jwt = require("jsonwebtoken");
+
 const { JWT_SECRET } = require("../config/config");
 
 const login = async (req, res)=>{
