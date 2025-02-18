@@ -1,10 +1,10 @@
 const mongoose = require("mongoose")
 
-const adSchema = new mongoose.Schema({
-    title: String,
-    imageUrl: String,
-    link: String,
-    createdAt: { type: Date, default: Date.now } 
-})
+const advertisementSchema = new mongoose.Schema({
+    title: { type: String, required: true },
+    image: { type: String, required: true }, // URL of the image
+    description: { type: String, required: true },
+},{ timestamps: true });
 
-module.exports = mongoose.model("Advertisement", adSchema);
+
+module.exports = mongoose.model("Advertisement", advertisementSchema);

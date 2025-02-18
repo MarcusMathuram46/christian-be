@@ -4,15 +4,27 @@ const { MONGODB_URL, PORT } = require("./config/config");
 const userRoute = require("./routes/userRoute")
 const advertisementRoutes = require("./routes/advertisementRoutes")
 const newsRoutes = require("./routes/newsRoutes");
+const path = require("path");
+const fs = require("fs");
 
 const cors = require("cors");
 const app = express();
-app.use(cors());
+app.use(
+    cors({
+      origin: ["http://localhost:5173", "http://localhost:5174"], // Ensure the frontend URLs are correct
+      methods: ["GET", "POST", "PUT", "DELETE","PATCH"],
+      credentials: true,  // Allow cookies or authentication headers
+    })
+  );
+
+
 app.use(express.json());
+// app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 
 // Routes
 app.use("/api/user", userRoute);
-app.use("/api/ads", advertisementRoutes)
+app.use("/api/advertisements", advertisementRoutes)
 app.use("/api/news", newsRoutes);
 
 

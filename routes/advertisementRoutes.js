@@ -1,12 +1,14 @@
 const express = require("express");
-const { createAd, getAds, updateAd, deleteAd } = require("../controllers/advertisement");
-const authMiddleware = require("../middleware/authMiddleware");
-
+const { createAd, getAds, updateAd, deleteAd, deleteSelectAd } = require("../controllers/advertisement");
+const verifyToken = require("../middleware/verifyToken");
+const upload = require("../middleware/uploadMiddleware");
 const router = express.Router();
 
-router.post("/", authMiddleware, createAd); // Create Advertisement
-router.get("/", getAds); // Get All Advertisements
-router.put("/:id", authMiddleware, updateAd); // Update Advertisement
-router.delete("/:id", authMiddleware, deleteAd); // Delete Advertisement
+// Advertisement Routes
+router.post("/", upload.single("image"),verifyToken, createAd); // Create Advertisement (Protected)
+router.get("/", getAds); // Get All Advertisements (Public)
+router.patch("/:id", upload.single("image"),verifyToken, updateAd); // Update Advertisement (Protected)
+router.delete("/:id", verifyToken, deleteAd); // Delete Advertisement (Protected)
+router.delete("/", verifyToken, deleteSelectAd);
 
 module.exports = router;
