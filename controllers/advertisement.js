@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 // Create Advertisement
 const createAd = async (req, res) => {
   try {
-    const { title, description } = req.body;
+    const { title, description,type } = req.body;
     const image = req.file
     ? `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`
     : null;
@@ -14,7 +14,7 @@ const createAd = async (req, res) => {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    const newAd = new Advertisement({ title, image, description });
+    const newAd = new Advertisement({ title, image, description, type });
     await newAd.save();
     res.status(201).json({ message: "Advertisement created", ad: newAd });
   } catch (error) {
@@ -31,6 +31,20 @@ const getAds = async (req, res) => {
     res.status(500).json({ message: "Error fetching advertisements", error });
   }
 };
+// Get Advertisement by Type
+const getAdsByType = async (req, res) => {
+  try {
+    const { type } = req.params;
+    if (!["important", "most-read", "general"].includes(type)) {
+      return res.status(400).json({ message: "Invalid advertisement category" });
+    }
+
+    const ads = await Advertisement.find({ type }).sort({ createdAt: -1 });
+    res.status(200).json(ads);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching categorized advertisements", error });
+  }
+}
 
 // Update Advertisement
 const updateAd = async (req, res, next) => {
@@ -44,7 +58,7 @@ const updateAd = async (req, res, next) => {
       return res.status(400).json({ message: 'Invalid advertisement ID' })
     }
 
-    const { title, description, existingImage } = req.body
+    const { title, description, type,existingImage } = req.body
     const image = req.file
       ? `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`
       : existingImage // Keep old image if no new one is uploaded
@@ -55,6 +69,7 @@ const updateAd = async (req, res, next) => {
         $set: {
           ...(title && { title }),
           ...(description && { description }),
+          ...(type && { type }),
           ...(image && { image }), // Preserve existing image if not changed
         },
       },
@@ -98,26 +113,25 @@ const deleteSelectAd = async (req, res) => {
       return res.status(401).json({ message: 'Unauthorized' })
     }
 
-    const { ids } = req.query // Use `req.query` instead of `req.body`
+    const { ids } = req.body // Changed from `req.query` to `req.body` for better scalability
 
-    if (!ids) {
-      return res.status(400).json({ message: 'No advertisement IDs provided' })
-    }
-
-    // Validate IDs
-    const validIds = ids
-      .split(',')
-      .filter((id) => mongoose.Types.ObjectId.isValid(id))
-
-    if (validIds.length === 0) {
+    if (!ids || !Array.isArray(ids)) {
       return res.status(400).json({ message: 'Invalid advertisement IDs' })
     }
 
-    await Advertisement.deleteMany({ _id: { $in: validIds } })
+    const validIds = ids.filter((id) => mongoose.Types.ObjectId.isValid(id))
 
-    res
-      .status(200)
-      .json({ message: 'Selected advertisements deleted successfully' })
+    if (validIds.length === 0) {
+      return res
+        .status(400)
+        .json({ message: 'No valid advertisement IDs provided' })
+    }
+
+    const result = await Advertisement.deleteMany({ _id: { $in: validIds } })
+
+    res.status(200).json({
+      message: `${result.deletedCount} advertisements deleted successfully`,
+    })
   } catch (error) {
     console.error('Error deleting advertisements:', error)
     res
@@ -127,4 +141,12 @@ const deleteSelectAd = async (req, res) => {
 }
 
 
-module.exports = { createAd, getAds, updateAd, deleteAd, deleteSelectAd };
+
+module.exports = {
+  createAd,
+  getAds,
+  getAdsByType,
+  updateAd,
+  deleteAd,
+  deleteSelectAd,
+}
