@@ -4,6 +4,9 @@ const { MONGODB_URL, PORT } = require("./config/config");
 const userRoute = require("./routes/userRoute")
 const advertisementRoutes = require("./routes/advertisementRoutes")
 const newsRoutes = require("./routes/newsRoutes");
+const churchRoutes = require("./routes//churchRoutes")
+const enquiryRoutes = require("./routes/enquiryRoutes")
+const visitorRoutes = require("./routes/visitorRoutes")
 const path = require("path");
 const fs = require("fs");
 
@@ -26,6 +29,10 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 app.use("/api/user", userRoute);
 app.use("/api/advertisements", advertisementRoutes)
 app.use("/api/news", newsRoutes);
+app.use('/api/churches', churchRoutes)
+app.use('/api/enquiry', enquiryRoutes)
+app.use('/api/visitors', visitorRoutes)
+
 
 
 mongoose.connect(MONGODB_URL,{ useNewUrlParser: true, useUnifiedTopology: true })
